@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 from typing import Dict, Type, List, Any, Optional
 import uvicorn
 
@@ -16,24 +16,32 @@ def register_model(key: str, model: Type[BaseModel]):
     return model
 
 # Пример моделей (добавляй сюда новые сколько угодно)
+
+class IdMixin:
+    id: int
+
 class Group(BaseModel):
     id: int
     name: str
     description: Optional[str] = Field(None)
 
-class User(BaseModel):
-    id: int
+class UserCreate(BaseModel):
+    # id: int
     name: str
-    email: str
+    email: EmailStr
     age: Optional[int] = Field(
-        None,
+        None, json_schema_extra={"ui:widget": "updown"}
     )
     rating: int = Field(3, ge=1, le=5, json_schema_extra={"ui:widget": "StarRatingWidget"})
     group_id: Optional[int] = Field(None, title="ID Группы", json_schema_extra={"x-foreign-key": "groups"})
+    parent_user_id: Optional[int] = Field(None, title="Батько", json_schema_extra={"x-foreign-key": "users"})
 
     model_config = {
         "json_schema_extra": {"title": "Сука твою мать это юзя"}
     }
+
+class User(UserCreate, IdMixin):
+    pass
 
 class Product(BaseModel):
     id: int
