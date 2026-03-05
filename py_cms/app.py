@@ -95,6 +95,10 @@ def delete_item(key: str, item_id: int):
     STORES[key] = [item for item in STORES[key] if item["id"] != item_id]
     return {"detail": "Deleted"}
 
+from py_cms.test import xxx
+
+app.include_router(xxx.get_router())
+
 if __name__ == "__main__":
     import uvicorn
 
