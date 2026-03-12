@@ -22,6 +22,10 @@ class View:
 class ReadOnly:
     ...
 
+@dataclass
+class ForeignTable:
+    name: str
+
 @overload
 def Field(
     default: Any = Undefined,
@@ -192,13 +196,9 @@ def Field(
     #TODO: Тут нужно добавить добавления данной хни в мету
 
     field_info: FieldInfo = SQLModelField(*args, **kwargs)
+    if foreign_table:
+        if isinstance(foreign_table, type) and issubclass(foreign_table, SQLModel):
+            field_info.metadata.append(ForeignTable(str(foreign_table.__tablename__)))
 
     return field_info
-
-class TestZxc(SQLModel):
-
-    x: int = Field(foreign_key="ffff")
-
-class Tz(TestZxc):
-    pass
 
