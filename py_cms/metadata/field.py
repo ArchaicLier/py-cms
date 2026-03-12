@@ -1,6 +1,7 @@
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Mapping, Sequence, Set, Tuple, TypedDict, NotRequired, Union, overload
 
-from sqlmodel import Column, Field as SQLModelField, Table as SqlModelTable, table
+from sqlmodel import Column, Field as SQLModelField, SQLModel, Table as SqlModelTable, table
 from sqlmodel.main import FieldInfo, FieldInfoMetadata, NoArgAnyCallable, OnDeleteType, Undefined # type: ignore[attr-defined]
 
 if TYPE_CHECKING:
@@ -9,7 +10,16 @@ if TYPE_CHECKING:
     from pydantic_core import PydanticUndefined as Undefined
     from pydantic_core import PydanticUndefinedType as UndefinedType
 
-class Table(SqlModelTable):
+@dataclass
+class Widget:
+    name: str
+
+@dataclass
+class View:
+    name: str
+
+@dataclass
+class ReadOnly:
     ...
 
 @overload
@@ -17,13 +27,13 @@ def Field(
     default: Any = Undefined,
     *,
     # Ui Metadata
-    foreign_table: str | None = None,
+    foreign_table: str | SQLModel | None = None,
     widget: str | None = None,
-    read_only: str | None = None,
+    read_only: bool = False,
     create_view: bool = False,
     read_view: bool = False,
     edit_view: bool = False,
-    rights: ... = ...,
+    custom_views: list[View] = [],
 
     default_factory: NoArgAnyCallable | None = None,
     alias: str | None = None,
@@ -69,13 +79,13 @@ def Field(
     default: Any = Undefined,
     *,
     # Ui Metadata
-    foreign_table: str | None = None,
+    foreign_table: str | SQLModel | None = None,
     widget: str | None = None,
-    read_only: str | None = None,
+    read_only: bool = False,
     create_view: bool = False,
     read_view: bool = False,
     edit_view: bool = False,
-    rights: ... = ...,
+    custom_views: list[View] = [],
 
     default_factory: NoArgAnyCallable | None = None,
     alias: str | None = None,
@@ -130,13 +140,13 @@ def Field(
     default: Any = Undefined,
     *,
     # Ui Metadata
-    foreign_table: str | None = None,
+    foreign_table: str | SQLModel | None = None,
     widget: str | None = None,
-    read_only: str | None = None,
+    read_only: bool = False,
     create_view: bool = False,
     read_view: bool = False,
     edit_view: bool = False,
-    rights: ... = ...,
+    custom_views: list[View] = [],
 
     default_factory: NoArgAnyCallable | None = None,
     alias: str | None = None,
@@ -171,14 +181,24 @@ def Field(
 def Field(
     *args, **kwargs
 ) -> Any:
+    foreign_table: str | SQLModel | None = kwargs.pop("foreign_key", None)
+    widget: str | None = kwargs.pop("widget", None)
+    read_only: bool = kwargs.pop("read_only", False)
+    create_view: bool = kwargs.pop("create_view", False)
+    read_view: bool = kwargs.pop("read_view", False)
+    edit_view: bool = kwargs.pop("edit_view", False)
+    custom_views: list[View] = kwargs.pop("custom_views", [])
 
-    foreign_table: str | None = kwargs.pop("foreign_key")
-    widget: str | None = kwargs.pop("widget")
-    read_only: str | None = kwargs.pop("read_only")
-    create_view: bool = kwargs.pop("create_view")
-    read_view: bool = kwargs.pop("read_view")
-    edit_view: bool = kwargs.pop("edit_view")
-    rights: ... = kwargs.pop("rights")
+    #TODO: Тут нужно добавить добавления данной хни в мету
 
-    return SQLModelField(*args, **kwargs)
-    
+    field_info: FieldInfo = SQLModelField(*args, **kwargs)
+
+    return field_info
+
+class TestZxc(SQLModel):
+
+    x: int = Field(foreign_key="ffff")
+
+class Tz(TestZxc):
+    pass
+
